@@ -19,6 +19,7 @@ pipeline {
         stage('Setup Podman') {
             steps {
                 sh '''
+                    ls /usr/bin
                     # Install necessary packages
                     /usr/bin/apk add --no-cache podman
                     # Verify Podman installation
