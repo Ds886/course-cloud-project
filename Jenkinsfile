@@ -19,9 +19,9 @@ pipeline {
                     sh '''
                         ls /usr/bin
                         # Install necessary packages
-                        /usr/bin/apk add --no-cache podman
+                        apk add --no-cache podman
                         # Verify Podman installation
-                        /usr/bin/podman --version
+                        podman --version
                     '''
                     
                 }
@@ -32,9 +32,9 @@ pipeline {
                 container('alpine'){
                     sh '''
                         # Run a test container
-                        /usr/bin/podman run -d --name test-container busybox sleep 3600
-                        /usr/bin/podman ps -a
-                        /usr/bin/podman rm test-container
+                        podman run -d --name test-container busybox sleep 3600
+                        podman ps -a
+                        podman rm test-container
                     '''
                 }
             }
