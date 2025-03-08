@@ -22,9 +22,7 @@ pipeline {
                         yum update -y
                         yum install -y git tree
                         '''
-                }
-                steps {
-                    container('alpine'){
+
                         checkout scm
                 }
             }
