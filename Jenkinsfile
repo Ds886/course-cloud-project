@@ -35,9 +35,9 @@ pipeline {
                             cd repos/producer
                             VERSION=$(cat VERSION)
                             echo "${PASSWORD}"| podman login docker.com -u "${USERNAME}" --password-stdin
-                            podman build -t "docker.com/dash886/course-rabbitprod:${VERSION}" -t "docker.com/dash886/course-rabbitprod:latest" .
-                            podman push "docker.com/dash886/course-rabbitprod:${VERSION}"
-                            podman push "docker.com/dash886/course-rabbitprod:latest"
+                            podman build -t "dash886/course-rabbitprod:${VERSION}" -t "dash886/course-rabbitprod:latest" .
+                            podman push "dash886/course-rabbitprod:${VERSION}"
+                            podman push "dash886/course-rabbitprod:latest"
                         '''
                     }
                 }
@@ -51,9 +51,9 @@ pipeline {
                             cd repos/consumer
                             VERSION=$(cat VERSION)
                             echo "${PASSWORD}"| podman login docker.com -u "${USERNAME}" --password-stdin
-                            podman build -t "docker.com/dash886/courserabbit-consume:${VERSION}" -t "docker.com/dash886/courserabbit-consume:latest" .
-                            podman push "docker.com/dash886/courserabbit-consume:${VERSION}"
-                            podman push "docker.com/dash886/courserabbit-consume:latest"
+                            podman build -t "dash886/courserabbit-consume:${VERSION}" -t "dash886/courserabbit-consume:latest" .
+                            podman push "dash886/courserabbit-consume:${VERSION}"
+                            podman push "dash886/courserabbit-consume:latest"
                         '''
                     }
                 }
