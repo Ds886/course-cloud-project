@@ -1,5 +1,24 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            label 'jenkins-agent=true'
+            defaultContainer 'my-custom-container'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    some-label: some-value
+spec:
+  containers:
+  - name: build
+    image: ubuntu:24:04
+    command: ["cat"]
+    tty: true
+  """
+        }
+    }
+
 
     stages {
         stage('Checkout') {
