@@ -6,16 +6,13 @@ pipeline {
             spec:
                 containers:
                     - name: alpine
-                      image: alpine:3.19
+                      image: quay.io/podman/stable
+                      securityContext:
+                        privileged: true
                       command: ["sh", "-c"]
-                      args: ["while true; do sleep 30; done"]
-                      volumeMounts:
-                        - name: podman-sock
-                          mountPath: /var/run/podman
-                volumes:
-                    - name: podman-sock
-                      hostPath:
-                        path: /var/run/podman
+                      args:
+                             - sleep
+                             - "1000000"
 '''
         }
     }
