@@ -12,7 +12,7 @@ metadata:
 spec:
   containers:
   - name: build
-    image: ubuntu:24:04
+    image: ubuntu:24.04
     command: ["cat"]
     tty: true
   """
