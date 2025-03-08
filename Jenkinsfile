@@ -27,6 +27,15 @@ pipeline {
                         ls /usr/bin
                         # Install necessary packages
                         apk add --no-cache podman
+                        cat << EOF > /etc/containers/storage.conf
+                        [storage]
+                        driver = "vfs"
+                        EOF
+                        # Configure rootless storage path using cat
+                        cat << EOF > /etc/containers/containers.conf
+                        [rootless]
+                        storage_path = "$HOME/.local/share/containers"
+                        EOF
                         # Verify Podman installation
                         podman --version
                     '''
