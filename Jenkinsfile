@@ -33,7 +33,6 @@ pipeline {
                     sh '''
                     tree .
                     '''
-                    }
                 }
             }
         }
