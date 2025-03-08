@@ -1,3 +1,4 @@
+node(POD_LABEL){
 pipeline {
     agent {
      kubernetes {
@@ -13,7 +14,6 @@ pipeline {
         }
     }
     stages {
-        node(POD_LABEL){
             stage('Setup Podman') {
                 steps {
                     container('alpine'){
