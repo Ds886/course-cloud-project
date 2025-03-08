@@ -10,9 +10,7 @@ pipeline {
                       securityContext:
                         privileged: true
                       command: ["sh", "-c"]
-                      args:
-                             - sleep
-                             - "1000000"
+                      args: ["while true; do sleep 30; done"]
 '''
         }
     }
