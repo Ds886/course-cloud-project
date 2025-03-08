@@ -24,7 +24,7 @@ pipeline {
             steps {
                 container('alpine'){
                     sh '''
-                        ls /usr/bin
+                        whoami
                         # Install necessary packages
                         apk add --no-cache podman
                         echo "[storage]" > /etc/containers/storage.conf
