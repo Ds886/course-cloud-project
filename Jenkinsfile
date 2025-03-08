@@ -4,8 +4,6 @@ pipeline {
             yaml """
                 apiVersion: v1
                 kind: Pod
-                metadate:
-                    namesspace
                 spec:
                   containers:
                   - name: podman-agent
