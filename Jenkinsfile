@@ -15,6 +15,20 @@ pipeline {
     }
     stages {
         stage('Setup Podman') {
+            agent {
+                kubernetes {
+                    yaml """
+                        apiVersion: v1
+                        kind: Pod
+                        spec:
+                          containers:
+                          - name: podman-agent
+                            image: alpine:3.19
+                            command: ["sh", "-c"]
+                            args: ["while true; do sleep 30; done"]
+                    """
+                }
+            }
             steps {
                 sh '''
                     ls /usr/bin
@@ -26,6 +40,20 @@ pipeline {
             }
         }
         stage('Test Podman') {
+            agent {
+                kubernetes {
+                    yaml """
+                        apiVersion: v1
+                        kind: Pod
+                        spec:
+                          containers:
+                          - name: podman-agent
+                            image: alpine:3.19
+                            command: ["sh", "-c"]
+                            args: ["while true; do sleep 30; done"]
+                    """
+                }
+            }
             steps {
                 sh '''
                     # Run a test container
