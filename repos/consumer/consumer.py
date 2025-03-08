@@ -5,9 +5,22 @@ import sys
 import argparse
 import time
 import json
+import threading
+from flask import Flask, jsonify
 from dotenv import load_dotenv
 from argparse import RawTextHelpFormatter
 from time import sleep
+
+
+app = Flask(__name__)
+is_connected = False
+lock = threading.Lock()
+
+logginginst = None
+rabbit_server = ""
+rabbit_port = ""
+rabbit_user = ""
+rabbit_password = ""
 
 
 def on_message(channel, method_frame, header_frame, body):
@@ -15,11 +28,48 @@ def on_message(channel, method_frame, header_frame, body):
     print("date: " + str(json.loads(body)["date"]))
     print("message: " + str(json.loads(body)["message"]))
     print("======")
-    LOG.info('Message has been received %s', body)
+    logginginst.info('Message has been received %s', body)
     channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
 
+def connect_to_rabbitmq():
+    global is_connected
+    credentials = pika.PlainCredentials(rabbit_user, rabbit_password)
+    parameters = pika.ConnectionParameters(rabbit_server,
+                                           int(rabbit_port),
+                                           '/',
+                                           credentials)
+    try:
+        connection = pika.BlockingConnection(parameters)
+        is_connected = True
+        channel = connection.channel()
+
+        channel.queue_declare('pc')
+        channel.basic_consume('pc', on_message)
+
+        channel.start_consuming()
+    except Exception:
+        is_connected = False
+        channel.stop_consuming()
+        connection.close()
+
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint that returns the connection status"""
+    with lock:
+        status = is_connected
+    if status:
+        return jsonify({'status': 'ok', 'connected': True}), 200
+    else:
+        return jsonify({'status': 'error', 'connected': False}), 500
+
+
+
 if __name__ == '__main__':
+    logginginst
+    logging.basicConfig(level=logging.INFO)
+    logginginst = logging.getLogger(__name__)
     load_dotenv()
     examples = sys.argv[0] + " -p 5672 -s rabbitmq "
     parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter,
@@ -27,12 +77,8 @@ if __name__ == '__main__':
                                      epilog=examples)
     parser.add_argument('-p', '--port', action='store', dest='port', help='The port to listen on.')
     parser.add_argument('-s', '--server', action='store', dest='server', help='The RabbitMQ server.')
-    rabbit_server = ""
-    rabbit_port = ""
-    rabbit_user = ""
-    rabbit_password = ""
-
     args = parser.parse_args()
+
     if os.getenv("RABBIT_HOST") is not None:
         rabbit_server = os.getenv("RABBIT_HOST")
     else:
@@ -63,21 +109,8 @@ if __name__ == '__main__':
         print("Missing required parameter RABBIT_USER")
         sys.exit(1)
 
-    logging.basicConfig(level=logging.INFO)
-    LOG = logging.getLogger(__name__)
-    credentials = pika.PlainCredentials(rabbit_user, rabbit_password)
-    parameters = pika.ConnectionParameters(rabbit_server,
-                                           int(rabbit_port),
-                                           '/',
-                                           credentials)
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
+    consumer_thread = threading.Thread(target=connect_to_rabbitmq)
+    consumer_thread.daemon = True
+    consumer_thread.start()
 
-    channel.queue_declare('pc')
-    channel.basic_consume('pc', on_message)
-
-    try:
-        channel.start_consuming()
-    except KeyboardInterrupt:
-        channel.stop_consuming()
-    connection.close()
+    app.run(host='0.0.0.0', port=5000)
