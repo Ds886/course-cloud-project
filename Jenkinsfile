@@ -22,5 +22,12 @@ pipeline {
                 }
             }
         }
+        stage('Producer - Build and Publish'){
+            steps {
+                container('alpine'){
+                    tree .
+                }
+            }
+        }
     }
 }
