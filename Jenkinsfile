@@ -15,25 +15,10 @@ pipeline {
         }
     }
     stages {
-        stage('Setup Podman') {
-            steps {
-                container('alpine'){
-                    sh '''
-                        podman --version
-                    '''
-                    
-                }
-            }
-        }
-        stage('Test Podman') {
-            steps {
-                container('alpine'){
-                    sh '''
-                        # Run a test container
-                        podman run -d --name test-container busybox sleep 3600
-                        podman ps -a
-                        podman rm test-container
-                    '''
+        stage('Checkout') {
+            container('alpine'){
+                steps {
+                    checkout scm
                 }
             }
         }
