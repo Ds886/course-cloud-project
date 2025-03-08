@@ -20,7 +20,7 @@ pipeline {
                     container('alpine'){
                         '''
                         yum update -y
-                        yum install -y git
+                        yum install -y git tree
                         '''
                 }
                 steps {
