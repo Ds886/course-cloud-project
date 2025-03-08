@@ -34,7 +34,7 @@ pipeline {
                         sh '''
                             cd repos/producer
                             VERSION=$(cat VERSION)
-                            echo "${PASSWORD}"| podman login docker.com -u "${USSERNAME}" --password-stdin
+                            echo "${PASSWORD}"| podman login docker.com -u "${USERNAME}" --password-stdin
                             podman build -t "docker.com/dash886/course-rabbitprod:${VERSION}" -t "dash886/course-rabbitprod:latest"
                             podman push "docker.com/dash886/course-rabbitprod:${VERSION}"
                             podman push "docker.com/dash886/course-rabbitprod:latest"
