@@ -25,6 +25,8 @@ if __name__ == '__main__':
 
     rabbit_server = ""
     rabbit_port = ""
+    rabbit_user = ""
+    rabbit_password = ""
     args = parser.parse_args()
 
     if os.getenv("RABBIT_HOST") is not None:
@@ -45,9 +47,21 @@ if __name__ == '__main__':
             print("Missing required argument: -p/--port")
             sys.exit(1)
 
+    if os.getenv("RABBIT_PASSWORD") is not None:
+        rabbit_password = os.getenv("RABBIT_PASSWORD")
+    else:
+        print("Missing required parameter RABBIT_PASSWORD")
+        sys.exit(1)
+
+    if os.getenv("RABBIT_USER") is not None:
+        rabbit_user = os.getenv("RABBIT_USER")
+    else:
+        print("Missing required parameter RABBIT_USER")
+        sys.exit(1)
+
     logging.basicConfig(level=logging.INFO)
     LOG = logging.getLogger(__name__)
-    credentials = pika.PlainCredentials('user', 'test')
+    credentials = pika.PlainCredentials(rabbit_user, rabbit_password)
     parameters = pika.ConnectionParameters(rabbit_server,
                                            int(rabbit_port),
                                            '/',

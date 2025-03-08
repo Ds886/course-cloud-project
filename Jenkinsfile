@@ -43,5 +43,21 @@ pipeline {
                 }
             }
         }
+        stage('Consumer - Build and Publish'){
+            steps {
+                withCredentials([usernamePassword(credentialsId: '7d236aad-d44f-43d3-89f7-137591bb8097', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    container('alpine'){
+                        sh '''
+                            cd repos/consumer
+                            VERSION=$(cat VERSION)
+                            echo "${PASSWORD}"| podman login docker.com -u "${USERNAME}" --password-stdin
+                            podman build -t "docker.com/dash886/courserabbit-consume:${VERSION}" -t "docker.com/dash886/courserabbit-consume:latest" .
+                            podman push "docker.com/dash886/courserabbit-consume:${VERSION}"
+                            podman push "docker.com/dash886/courserabbit-consume:latest"
+                        '''
+                    }
+                }
+            }
+        }
     }
 }
