@@ -1,21 +1,26 @@
 import pika
+import os
 import logging
 import sys
 import argparse
 import time
+import json
+from dotenv import load_dotenv
 from argparse import RawTextHelpFormatter
 from time import sleep
 
 
 def on_message(channel, method_frame, header_frame, body):
     print(method_frame.delivery_tag)
-    print(body)
+    print("date: " + str(json.loads(body)["date"]))
+    print("message: " + str(json.loads(body)["message"]))
     print("======")
     LOG.info('Message has been received %s', body)
     channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
 
 if __name__ == '__main__':
+    load_dotenv()
     examples = sys.argv[0] + " -p 5672 -s rabbitmq "
     parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter,
                                      description='Run consumer.py',
@@ -69,7 +74,7 @@ if __name__ == '__main__':
     channel = connection.channel()
 
     channel.queue_declare('pc')
-    channel.basic_consume(on_message, 'pc')
+    channel.basic_consume('pc', on_message)
 
     try:
         channel.start_consuming()
