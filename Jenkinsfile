@@ -25,8 +25,11 @@ pipeline {
         stage('Producer - Build and Publish'){
             steps {
                 container('alpine'){
+                    sh '''
                     tree .
+                    '''
                 }
+
             }
         }
     }
