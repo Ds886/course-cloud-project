@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'default-tcdcz' }
+    agent any
 
     stages {
         stage('Checkout') {
