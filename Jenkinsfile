@@ -25,13 +25,16 @@ pipeline {
                 container('alpine'){
                     sh '''
                         whoami
+                        MYID=$(id -u)
                         # Install necessary packages
                         apk add --no-cache podman
                         echo "[storage]" > /etc/containers/storage.conf
                         echo 'driver = "vfs"' >> /etc/containers/storage.conf
+                        echo "runroot = "/run/user/$(id -u)" >> /etc/containers/storage.conf
                         # Configure rootless storage path using echo
                         echo "[rootless]" > /etc/containers/containers.conf
-                        printf 'storage_path = "%s/.local/share/containers"' "$HOME" >> /etc/containers/containers.conf
+                        printf 'storage_path = "%s/.local/share/containers"\n' "$HOME" >> /etc/containers/containers.conf
+                        echo "runroot = "/run/user/${MYID}" >> /etc/containers/storage.conf
                         # Verify Podman installation
                         podman --version
                     '''
