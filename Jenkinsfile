@@ -7,8 +7,9 @@ pipeline {
                 spec:
                   containers:
                   - name: podman-agent
-                    image: quay.io/podman/podman-docker
-                    command: ["cat"]
+                    image: alpine:3.19
+                    command: ["sh", "-c"]
+                    args: ["while true; do sleep 30; done"]
                     volumeMounts:
                     - name: podman-sock
                       mountPath: /var/run/podman
@@ -20,14 +21,25 @@ pipeline {
         }
     }
     stages {
+        stage('Setup Podman') {
+            steps {
+                sh '''
+                    # Install necessary packages
+                    apk add --no-cache podman
+                    # Verify Podman installation
+                    podman --version
+                '''
+            }
+        }
         stage('Test Podman') {
             steps {
-                sh 'podman --version'
-                sh 'podman run -d --name test-container busybox sleep 3600'
-                sh 'podman ps -a'
-                sh 'podman rm test-container'
+                sh '''
+                    # Run a test container
+                    podman run -d --name test-container busybox sleep 3600
+                    podman ps -a
+                    podman rm test-container
+                '''
             }
         }
     }
 }
-
