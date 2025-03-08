@@ -1,26 +1,32 @@
 pipeline {
     agent any
 
-    environment {
-        PYTHON_VERSION = '3.9'
-        VENV_NAME = 'venv'
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                // Get code from GitHub repository
                 checkout scm
             }
         }
-
-        stage('test'){
+        
+        stage('Build') {
             steps {
-                script {
-                    echo "hello jenkins"
-                }
+                // Your build steps here
+                echo 'Building..'
             }
         }
-
+        
+        stage('Test') {
+            steps {
+                // Your test steps here
+                echo 'Testing..'
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                // Your deployment steps here
+                echo 'Deploying....'
+            }
+        }
     }
- }
+}
