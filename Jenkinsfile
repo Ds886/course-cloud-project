@@ -18,6 +18,13 @@ pipeline {
         stage('Checkout') {
                 steps {
                     container('alpine'){
+                        '''
+                        yum update -y
+                        yum install -y git
+                        '''
+                }
+                steps {
+                    container('alpine'){
                         checkout scm
                 }
             }
@@ -29,7 +36,6 @@ pipeline {
                     tree .
                     '''
                 }
-
             }
         }
     }
