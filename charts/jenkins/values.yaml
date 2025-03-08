@@ -407,6 +407,7 @@ controller:
     - workflow-aggregator:600.vb_57cdd26fdd7
     - git:5.7.0
     - configuration-as-code:1932.v75cb_b_f1b_698d
+    - github:1.42.0
 
   # If set to false, Jenkins will download the minimum required version of all dependencies.
   # -- Download the minimum required version or latest version of all dependencies
