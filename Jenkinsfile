@@ -16,9 +16,9 @@ pipeline {
     }
     stages {
         stage('Checkout') {
-            container('alpine'){
                 steps {
-                    checkout scm
+                    container('alpine'){
+                        checkout scm
                 }
             }
         }
