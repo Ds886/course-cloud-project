@@ -29,10 +29,17 @@ pipeline {
         }
         stage('Producer - Build and Publish'){
             steps {
-                container('alpine'){
-                    sh '''
-                    tree .
-                    '''
+                withCredentials([usernamePassword(credentialsId: '7d236aad-d44f-43d3-89f7-137591bb8097', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    container('alpine'){
+                        sh '''
+                            cd repos/producer
+                            VERSION=$(cat VERSION)
+                            echo "${PASSWORD}"| podman login docker.com -u "${USSERNAME}" --password-stdin
+                            podman build -t "docker.com/dash886/course-rabbitprod:${VERSION}" -t "dash886/course-rabbitprod:latest"
+                            podman push "docker.com/dash886/course-rabbitprod:${VERSION}"
+                            podman push "docker.com/dash886/course-rabbitprod:latest"
+                        '''
+                    }
                 }
             }
         }
