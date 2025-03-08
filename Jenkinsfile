@@ -18,7 +18,7 @@ pipeline {
         stage('Checkout') {
                 steps {
                     container('alpine'){
-                        '''
+                        sh '''
                         yum update -y
                         yum install -y git tree
                         '''
