@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
     LOG = logging.getLogger(__name__)
-    credentials = pika.PlainCredentials('user', 'Aa123456')
+    credentials = pika.PlainCredentials('user', 'test')
     parameters = pika.ConnectionParameters(rabbit_server,
                                            int(rabbit_port),
                                            '/',
