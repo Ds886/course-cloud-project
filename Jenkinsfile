@@ -4,6 +4,8 @@ pipeline {
             yaml """
                 apiVersion: v1
                 kind: Pod
+                metadate:
+                    namesspace
                 spec:
                   containers:
                   - name: podman-agent
@@ -18,9 +20,9 @@ pipeline {
             steps {
                 sh '''
                     # Install necessary packages
-                    apk add --no-cache podman
+                    /usr/bin/apk add --no-cache podman
                     # Verify Podman installation
-                    podman --version
+                    /usr/bin/podman --version
                 '''
             }
         }
@@ -28,9 +30,9 @@ pipeline {
             steps {
                 sh '''
                     # Run a test container
-                    podman run -d --name test-container busybox sleep 3600
-                    podman ps -a
-                    podman rm test-container
+                    /usr/bin/podman run -d --name test-container busybox sleep 3600
+                    /usr/bin/podman ps -a
+                    /usr/bin/podman rm test-container
                 '''
             }
         }
