@@ -6,8 +6,8 @@
 consumer:
   rabbitmqSecret:
     secretFromExisitng:
-      enabled: false
-    #   rabbitmqSecretName: ""
+      enabled: true
+      rabbitmqSecretName: "rabbit-secret"
     rabbitmqHost: "rabbitmq-headless.rabbitmq.svc.cluster.local"
     rabbitmqPort: "5672"
     rabbitmqUsername: ""

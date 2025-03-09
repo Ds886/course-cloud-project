@@ -13,8 +13,5 @@ spec:
   endpoints:
   - name: http
     interval: 30s
-    port: service
-    http:
-      scheme: HTTP
-      path: /metrics
+    port: http
 {{- end -}}
