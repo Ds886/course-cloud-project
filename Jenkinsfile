@@ -5,7 +5,7 @@ pipeline {
          yaml '''
             spec:
                 containers:
-                    - name: alpine
+                    - name: podman
                       image: quay.io/podman/stable
                       securityContext:
                         privileged: true
@@ -15,15 +15,21 @@ pipeline {
         }
     }
     stages {
-        stage('Checkout') {
+        stage('prepare') {
                 steps {
-                    container('alpine'){
+                    container('podman'){
                         sh '''
                         yum update -y
-                        yum install -y git tree
+                        yum install -y git tree curl
                         '''
 
                         checkout scm
+
+                        sh ```
+                        curl -Lo helm.tgz "https://get.helm.sh/helm-v3.17.1-linux-amd64.tar.gz"
+                        tar xf helm.tgz
+                        install -Dvm755 "linux-amd64/helm" "/usr/bin"
+                        ```
                 }
             }
         }
@@ -54,6 +60,30 @@ pipeline {
                             podman build -t "docker.io/dash886/courserabbit-consume:${VERSION}" -t "docker.io/dash886/courserabbit-consume:latest" .
                             podman push "docker.io/dash886/courserabbit-consume:${VERSION}"
                             podman push "docker.io/dash886/courserabbit-consume:latest"
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Producer - deploy'){
+            steps {
+                withCredentials([usernamePassword(credentialsId: '7d236aad-d44f-43d3-89f7-137591bb8097', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    container('alpine'){
+                        sh '''
+                            cd repos/producer/chart
+                            helm upgrade --install -n  project-cloud-arch producer .
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Consumer - Deploy'){
+            steps {
+                withCredentials([usernamePassword(credentialsId: '7d236aad-d44f-43d3-89f7-137591bb8097', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    container('alpine'){
+                        sh '''
+                            cd repos/consumer/chart
+                            helm upgrade --install -n  project-cloud-arch consumer .
                         '''
                     }
                 }
