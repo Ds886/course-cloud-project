@@ -11,7 +11,6 @@ spec:
     matchLabels:
       {{- include "rabbitconsumer.selectorLabels" . | nindent 6 }}
   endpoints:
-  - name: http
-    interval: 30s
-    port: http
+    - interval: 30s
+      port: http
 {{- end -}}
