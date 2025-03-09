@@ -36,11 +36,39 @@ deployHelm(){
   set -u
   # shellcheck disable=SC2086
   [ -z "$PARAM_REV" ] && "$BIN_HELM" -n ${PARAM_CHART_NAME} ${PARAM_COMM} ${PARAM_CHART_NAME} ./charts/${PARAM_CHART_NAME}
+  # shellcheck disable=SC2086
   [ -n "$PARAM_REV" ] && "$BIN_HELM" -n ${PARAM_CHART_NAME} ${PARAM_COMM} ${PARAM_CHART_NAME} 
 }
 
+# shellcheck disable=SC2120
+deployRabbit(){
+  PARAM_REV="$1"
+  # shellcheck disable=SC2086
+  deployHelm rabbitmq $PARAM_REV
+}
+
+# shellcheck disable=SC2120
+deployJenkins(){
+  PARAM_REV="$1"
+  PARAM_COMMAND=apply
+  [ -n "${PARAM_COMMAND}" ] && PARAM_COMMAND=delete
+  # shellcheck disable=SC2086
+  deployHelm jenkins $PARAM_REV
+  sleep 5s
+  "${BIN_KUBECTL}" -n project-cloud-arch "$PARAM_COMMAND" -f ./non-helm/jenkins-allow-deploy.yaml
+}
+
+# shellcheck disable=SC2120
 deploy(){
   deployNs
+  deployJenkins
+  deployRabbit
+}
+
+destroy(){
+  deployRabbit "${PARAM_REV}"
+  deployJenkins  "${PARAM_REV}"
+  deployNs "${PARAM_REV}"
 }
 
 case "$EXT_PARAM" in
@@ -49,28 +77,37 @@ case "$EXT_PARAM" in
     ;;
 
   "deploy-jenkins")
-    deployHelm jenkins
+    deployJenkins
     ;;
 
   "deploy-rabbitmq")
-    deployHelm rabbitmq
+    deployRabbit
     ;;
 
   "deploy")
     deploy
     ;;
 
+  "destroy-jenkins")
+    deployJenkins rev
+    ;;
+
   "destroy-rabbitmq")
-      deployHelm rabbitmq rev
+    deployRabbit rev
+    ;;
+
+
+  "destroy-ns")
+    deployNs rev
     ;;
 
 
   "destroy")
-    deployNs rev
+    destroy
     ;;
 
   *)
-    echo "default just bulding"
+    echo "no target given possibie targets: deploy, destroy, deploy-ns, deploy-jenkins, deploy-rabbitmq, destroy-ns, destroy-jenkins, destroy-rabbitmq"
     ;;
         
 esac
