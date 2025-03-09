@@ -36,7 +36,7 @@ pipeline {
         stage('Producer - Build and Publish'){
             steps {
                 withCredentials([usernamePassword(credentialsId: '7d236aad-d44f-43d3-89f7-137591bb8097', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    container('alpine'){
+                    container('podman'){
                         sh '''
                             cd repos/producer
                             VERSION=$(cat VERSION)
@@ -52,7 +52,7 @@ pipeline {
         stage('Consumer - Build and Publish'){
             steps {
                 withCredentials([usernamePassword(credentialsId: '7d236aad-d44f-43d3-89f7-137591bb8097', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    container('alpine'){
+                    container('podman'){
                         sh '''
                             cd repos/consumer
                             VERSION=$(cat VERSION)
@@ -68,7 +68,7 @@ pipeline {
         stage('Producer - deploy'){
             steps {
                 withCredentials([usernamePassword(credentialsId: '7d236aad-d44f-43d3-89f7-137591bb8097', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    container('alpine'){
+                    container('podman'){
                         sh '''
                             cd repos/producer/chart
                             helm upgrade --install -n  project-cloud-arch producer .
@@ -80,7 +80,7 @@ pipeline {
         stage('Consumer - Deploy'){
             steps {
                 withCredentials([usernamePassword(credentialsId: '7d236aad-d44f-43d3-89f7-137591bb8097', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    container('alpine'){
+                    container('podman'){
                         sh '''
                             cd repos/consumer/chart
                             helm upgrade --install -n  project-cloud-arch consumer .
