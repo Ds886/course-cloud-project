@@ -7,7 +7,7 @@ pipeline {
                 serviceAccountName: "jenkins-project-cloud-sa"
                 containers:
                     - name: podman
-                      image: quay.io/podman/stable
+                      image: alpine:3.19
                       securityContext:
                         privileged: true
                       command: ["sh", "-c"]
@@ -20,8 +20,7 @@ pipeline {
                 steps {
                     container('podman'){
                         sh '''
-                        yum update -y
-                        yum install -y git curl
+                        apk add curl git
                         '''
 
                         checkout scm
