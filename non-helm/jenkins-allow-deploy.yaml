@@ -1,0 +1,30 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jenkins-deploy
+  namespace: project-cloud-arch
+rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["deployments", "pods", "services", "ingresses", "secrets"]
+    verbs: ["get", "list", "create", "update", "delete", "patch"]
+---
+# rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-deploy-binding
+  namespace: project-cloud-arch
+roleRef:
+  name: jenkins-deploy
+  kind: Role
+subjects:
+  - kind: ServiceAccount
+    name: jenkins-project-cloud-sa
+    namespace: jenkins
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-project-cloud-sa
+  namespace: jenkins
