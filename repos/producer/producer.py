@@ -5,9 +5,68 @@ import argparse
 import os
 import json
 import datetime
+import threading
 from argparse import RawTextHelpFormatter
 from time import sleep
 from dotenv import load_dotenv
+from flask import Flask, jsonify
+
+
+app = Flask(__name__)
+is_connected = False
+lock = threading.Lock()
+
+logginginst = None
+rabbit_server = ""
+rabbit_port = ""
+rabbit_user = ""
+rabbit_password = ""
+
+
+def connect_to_rabbitmq():
+    global is_connected
+    credentials = pika.PlainCredentials(rabbit_user, rabbit_password)
+    parameters = pika.ConnectionParameters(rabbit_server,
+                                           int(rabbit_port),
+                                           '/',
+                                           credentials)
+    try:
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        is_connected = True
+        q = channel.queue_declare('pc')
+        q_name = q.method.queue
+
+        # Turn on delivery confirmations
+        channel.confirm_delivery()
+
+        while True:
+            curr_obj = {
+                "date": str(datetime.datetime.now()),
+                "message": args.message
+            }
+            try:
+                channel.basic_publish('', q_name, json.dumps(curr_obj))
+                logginginst.info('Message has been delivered')
+
+            except Exception:
+                logginginst.warning('Message NOT delivered' + e)
+            sleep(20)
+
+    except Exception:
+        is_connected = False
+        connection.close()
+
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint that returns the connection status"""
+    with lock:
+        status = is_connected
+    if status:
+        return jsonify({'status': 'ok', 'connected': True}), 200
+    else:
+        return jsonify({'status': 'error', 'connected': False}), 500
 
 
 if __name__ == '__main__':
@@ -60,31 +119,10 @@ if __name__ == '__main__':
         sys.exit(1)
 
     logging.basicConfig(level=logging.INFO)
-    LOG = logging.getLogger(__name__)
-    credentials = pika.PlainCredentials(rabbit_user, rabbit_password)
-    parameters = pika.ConnectionParameters(rabbit_server,
-                                           int(rabbit_port),
-                                           '/',
-                                           credentials)
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
-    q = channel.queue_declare('pc')
-    q_name = q.method.queue
+    logginginst = logging.getLogger(__name__)
 
-    # Turn on delivery confirmations
-    channel.confirm_delivery()
+    consumer_thread = threading.Thread(target=connect_to_rabbitmq)
+    consumer_thread.daemon = True
+    consumer_thread.start()
 
-    while True:
-        curr_obj = {
-            "date": str(datetime.datetime.now()),
-            "message": args.message
-        }
-        try:
-            if channel.basic_publish('', q_name, json.dumps(curr_obj)):
-                LOG.info('Message has been delivered')
-        except Exception as e:
-            LOG.warning('Message NOT delivered' + e)
-
-        sleep(20)
-
-    connection.close()
+    app.run(host='0.0.0.0', port=5000)

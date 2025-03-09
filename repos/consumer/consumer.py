@@ -41,12 +41,12 @@ def connect_to_rabbitmq():
                                            credentials)
     try:
         connection = pika.BlockingConnection(parameters)
-        is_connected = True
         channel = connection.channel()
 
         channel.queue_declare('pc')
         channel.basic_consume('pc', on_message)
 
+        is_connected = True
         channel.start_consuming()
     except Exception:
         is_connected = False
@@ -63,7 +63,6 @@ def health_check():
         return jsonify({'status': 'ok', 'connected': True}), 200
     else:
         return jsonify({'status': 'error', 'connected': False}), 500
-
 
 
 if __name__ == '__main__':
