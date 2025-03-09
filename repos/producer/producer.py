@@ -51,7 +51,7 @@ def connect_to_rabbitmq():
 
             except Exception:
                 logginginst.warning('Message NOT delivered' + e)
-            sleep(20)
+            sleep(3)
 
     except Exception:
         is_connected = False
@@ -125,4 +125,4 @@ if __name__ == '__main__':
     consumer_thread.daemon = True
     consumer_thread.start()
 
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5001)

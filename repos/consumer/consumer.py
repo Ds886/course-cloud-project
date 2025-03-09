@@ -9,7 +9,21 @@ import threading
 from flask import Flask, jsonify
 from dotenv import load_dotenv
 from argparse import RawTextHelpFormatter
+from prometheus_client import Counter, Gauge, generate_latest
 from time import sleep
+
+
+class Metrics:
+    def __init__(self):
+        # Counter for total messages processed
+        self.message_counter = Counter('message_processed_total',
+                                       'Total number of messages processed')
+        # # Gauge for message processing time
+        # self.process_time_gauge = Gauge('message_processing_time_seconds',
+        #                                 'Time taken to process a message in seconds')
+        # # Gauge for heartbeat intervals
+        # self.heartbeat_gauge = Gauge('consumer_heartbeat_interval_seconds',
+        #                              'Time between heartbeats in seconds')
 
 
 app = Flask(__name__)
@@ -21,15 +35,18 @@ rabbit_server = ""
 rabbit_port = ""
 rabbit_user = ""
 rabbit_password = ""
+metrics = Metrics()
 
 
 def on_message(channel, method_frame, header_frame, body):
+    global metrics
     print(method_frame.delivery_tag)
     print("date: " + str(json.loads(body)["date"]))
     print("message: " + str(json.loads(body)["message"]))
     print("======")
     logginginst.info('Message has been received %s', body)
     channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+    metrics.message_counter.inc(1)
 
 
 def connect_to_rabbitmq():
@@ -63,6 +80,12 @@ def health_check():
         return jsonify({'status': 'ok', 'connected': True}), 200
     else:
         return jsonify({'status': 'error', 'connected': False}), 500
+
+
+@app.route('/metrics', methods=['GET'])
+def get_metrics():
+    """Expose metrics in Prometheus format"""
+    return generate_latest()
 
 
 if __name__ == '__main__':

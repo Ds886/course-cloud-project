@@ -1,0 +1,20 @@
+{{- if .Values.serviceMonitor.enabled -}}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "rabbitconsumer.fullname" . }}
+  labels:
+    {{- include "rabbitconsumer.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "rabbitconsumer.selectorLabels" . | nindent 6 }}
+  endpoints:
+  - name: http
+    interval: 30s
+    port: service
+    http:
+      scheme: HTTP
+      path: /metrics
+{{- end -}}

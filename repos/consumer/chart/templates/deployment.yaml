@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rabbitconsumer.fullname" . }}
+  labels:
+    {{- include "rabbitconsumer.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rabbitconsumer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rabbitconsumer.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rabbitconsumer.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: RABBIT_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: "{{- if .Values.consumer.rabbitmqSecret.secretFromExisitng.enabled -}}{{.Values.consumer.rabbitmqSecret.secretFromExisitng.rabbitmqSecretName -}}{{- else -}}rabbit-secret{{- end -}}"
+                  key: rabbitmq_host
+            - name: RABBIT_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: "{{- if .Values.consumer.rabbitmqSecret.secretFromExisitng.enabled -}}{{.Values.consumer.rabbitmqSecret.secretFromExisitng.rabbitmqSecretName -}}{{- else -}}rabbit-secret{{- end -}}"
+                  key: rabbitmq_port
+            - name: RABBIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{- if .Values.consumer.rabbitmqSecret.secretFromExisitng.enabled -}}{{.Values.consumer.rabbitmqSecret.secretFromExisitng.rabbitmqSecretName -}}{{- else -}}rabbit-secret{{- end -}}"
+                  key: rabbitmq_password
+            - name: RABBIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{- if .Values.consumer.rabbitmqSecret.secretFromExisitng.enabled -}}{{.Values.consumer.rabbitmqSecret.secretFromExisitng.rabbitmqSecretName -}}{{- else -}}rabbit-secret{{- end -}}"
+                  key: rabbitmq_username
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
