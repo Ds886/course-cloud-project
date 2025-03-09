@@ -25,11 +25,11 @@ pipeline {
 
                         checkout scm
 
-                        sh ```
+                        sh '''
                         curl -Lo helm.tgz "https://get.helm.sh/helm-v3.17.1-linux-amd64.tar.gz"
                         tar xf helm.tgz
                         install -Dvm755 "linux-amd64/helm" "/usr/bin"
-                        ```
+                        '''
                 }
             }
         }
