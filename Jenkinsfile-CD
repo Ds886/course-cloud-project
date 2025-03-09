@@ -4,7 +4,7 @@ pipeline {
         inheritFrom 'default'
          yaml '''
             spec:
-                serviceAccountName: jenkins-project-cloud-sa
+                serviceAccountName: "jenkins-project-cloud-sa"
                 containers:
                     - name: podman
                       image: quay.io/podman/stable
