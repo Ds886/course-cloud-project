@@ -6,7 +6,10 @@ metadata:
   namespace: project-cloud-arch
 rules:
   - apiGroups: ["", "apps", "networking.k8s.io"]
-    resources: ["deployments", "pods", "services", "ingresses", "secrets"]
+    resources: ["deployments", "pods", "services", "ingresses", "secrets", "serviceaccounts"]
+    verbs: ["get", "list", "create", "update", "delete", "patch"]
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["servicemonitors"]
     verbs: ["get", "list", "create", "update", "delete", "patch"]
 ---
 # rolebinding.yaml
@@ -20,7 +23,7 @@ roleRef:
   kind: Role
 subjects:
   - kind: ServiceAccount
-    name: jenkins-project-cloud-sa
+    name: default
     namespace: jenkins
 ---
 apiVersion: v1

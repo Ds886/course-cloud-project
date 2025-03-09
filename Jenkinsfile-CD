@@ -4,7 +4,6 @@ pipeline {
         inheritFrom 'default'
          yaml '''
             spec:
-                serviceAccountName: "jenkins-project-cloud-sa"
                 containers:
                     - name: podman
                       image: alpine:3.19
